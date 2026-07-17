@@ -1,0 +1,39 @@
+# Nix build artifacts
+result
+result-*
+.direnv/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Secrets — never commit
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+id_rsa*
+*.netrc
+*credentials*
+*secret*
+*private*
+*.token
+
+# Claude Code local settings (machine-specific)
+.claude/
+
+# CommandCode (machine-specific)
+.commandcode/
+
+# Vim
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# nginx — generated per-machine, not versioned
+config/nginx/servers/*.conf

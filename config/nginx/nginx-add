@@ -1,0 +1,54 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+DOMAIN="${1:?Usage: nginx-add <domain> <port>}"
+PORT="${2:?Usage: nginx-add <domain> <port>}"
+CERT_DIR="$HOME/.local/share/mkcert"
+SERVERS_DIR="$(realpath "$HOME/.config/nginx/servers")"
+
+mkdir -p "$CERT_DIR"
+
+echo "→ Generating certificate for $DOMAIN..."
+mkcert -cert-file "$CERT_DIR/$DOMAIN.pem" -key-file "$CERT_DIR/$DOMAIN-key.pem" "$DOMAIN"
+
+CONFIG="$SERVERS_DIR/$DOMAIN.conf"
+cat > "$CONFIG" <<NGINX
+server {
+    listen 80;
+    server_name $DOMAIN;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
+
+    ssl_certificate     $CERT_DIR/$DOMAIN.pem;
+    ssl_certificate_key $CERT_DIR/$DOMAIN-key.pem;
+
+    location / {
+        proxy_pass         http://localhost:$PORT;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade    \$http_upgrade;
+        proxy_set_header   Connection 'upgrade';
+        proxy_set_header   Host       \$host;
+        proxy_set_header   X-Real-IP  \$remote_addr;
+        proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+NGINX
+
+echo "→ Config written to $CONFIG"
+
+if ! grep -q "127.0.0.1 $DOMAIN" /etc/hosts 2>/dev/null; then
+    echo "→ Adding $DOMAIN to /etc/hosts (requires sudo)..."
+    echo "127.0.0.1 $DOMAIN" | sudo tee -a /etc/hosts > /dev/null
+fi
+
+echo "→ Reloading nginx..."
+brew services restart nginx
+
+echo ""
+echo "✓ https://$DOMAIN → localhost:$PORT"
