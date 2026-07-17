@@ -2,6 +2,9 @@
 
 Personal dotfiles managed with [Nix Home Manager](https://github.com/nix-community/home-manager).
 
+<img width="1868" height="1078" alt="CleanShot 2026-07-18 at 06 52 51" src="https://github.com/user-attachments/assets/67b2c8d6-8865-4a4a-99bb-6d56e87f58de" />
+
+
 ## Structure
 
 ```

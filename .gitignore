@@ -9,8 +9,6 @@ result-*
 .LSOverride
 
 # Secrets — never commit
-.env
-.env.*
 *.pem
 *.key
 *.pfx
@@ -37,3 +35,5 @@ id_rsa*
 
 # nginx — generated per-machine, not versioned
 config/nginx/servers/*.conf
+config.bat
+node_modules
